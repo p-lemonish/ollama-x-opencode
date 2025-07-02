@@ -10,7 +10,19 @@ services:
             - driver: nvidia
               count: all
               capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "nvidia-smi"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 1m
     volumes:
       - ${OLLAMA_DATA}:/root/.ollama       
     ports:
       - "11434:11434"
+    networks:
+      - ${DOCKER_NETWORK}
+
+networks:
+  ${DOCKER_NETWORK}:
+    external: true
