@@ -23,6 +23,11 @@ local models.
 I found out why agentic actions such as using opencode's provided tools didn't work.
 It's because Ollama has set the context window at 4096 for the models.
 
+Even though ollama says the context is larger, for example for qwen3 it
+says context is around 40k, upon running the model via ollama, it will use a default
+of 4k context, this **has** to be setup by yourself. Also make sure the model
+you are planning to use actually supports *agentic* tools.
+
 This was fixed by doing the following:
 
 For example, after pulling `qwen3:8b`
