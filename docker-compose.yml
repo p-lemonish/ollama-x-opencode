@@ -16,6 +16,10 @@ services:
       timeout: 5s
       retries: 3
       start_period: 1m
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_KEEP_ALIVE=24h
+      - OLLAMA_ORIGINS="*"
     volumes:
       - ${OLLAMA_DATA}:/root/.ollama       
     ports:
