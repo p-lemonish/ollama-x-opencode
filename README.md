@@ -49,7 +49,8 @@ Then using the following `config.json`
     "ollama": {
       "npm": "@ai-sdk/openai-compatible",
       "options": {
-        "baseURL": "http://localhost:11434/v1"
+        "baseURL": "http://127.0.0.1:11434/v1",
+        "apiKey": "ollama"
       },
       "models": {
         "qwen3:8b-16k": {
@@ -106,3 +107,23 @@ hello world, from qwen3
 ```
 
 ta-da!
+
+## Troubleshooting & Common Hanging Issues on Windows
+
+If your OpenCode integration with Ollama hangs or doesn't get any responses back, this is usually caused by one of the following reasons:
+
+### 1. Localhost resolving to IPv6 (`::1`) instead of IPv4 (`127.0.0.1`)
+By default, Ollama on Windows binds only to the IPv4 loopback address (`127.0.0.1:11434`). However, on Windows, `localhost` often resolves to the IPv6 loopback address (`::1`).
+*   **The Issue:** When OpenCode attempts to connect to `http://localhost:11434/v1`, it tries the IPv6 address first. If your firewall or system network configuration silently drops these packets instead of immediately rejecting them, the connection will hang until it times out.
+*   **The Fix:** Change the `"baseURL"` in your config file to explicitly use `http://127.0.0.1:11434/v1` instead of `localhost`.
+
+### 2. Missing `apiKey` in the OpenAI-compatible configuration
+The `@ai-sdk/openai-compatible` provider used in OpenCode expects an API key by default.
+*   **The Issue:** If `"apiKey"` is not specified in the configuration and you do not have an `OPENAI_API_KEY` environment variable set, the SDK initialization throws a missing API key error internally. Since the OpenCode UI may not capture or display this promise rejection, it will result in a silent hang.
+*   **The Fix:** Add `"apiKey": "ollama"` (or any dummy placeholder string) to the `"options"` object in your `config.json` file.
+
+### 3. WSL2 / Docker Network Bridging
+If you are running OpenCode in WSL2 or a Docker container while running Ollama natively on Windows:
+*   Make sure you set the environment variable `OLLAMA_HOST` to `0.0.0.0` on Windows so it listens on all interfaces (remember to exit Ollama from the system tray and restart it).
+*   Add a Windows Firewall rule to allow port `11434` incoming traffic.
+*   Use `http://host.docker.internal:11434/v1` or the Windows host's IP address instead of `localhost` in your config.
